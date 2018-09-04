@@ -125,6 +125,12 @@ func createJenkinsCredential(project string, serviceaccount string, organization
 	secret := saJson.S("secrets").Index(0)
 	secretName := strings.Trim(secret.Path("name").String(), "\"")
 
+	// The secret with dockercfg is the wrong one. In some rare cases this is the first secret returned
+	if strings.Contains(secretName, "dockercfg") {
+		secret = saJson.S("secrets").Index(1)
+		secretName = strings.Trim(secret.Path("name").String(), "\"")
+	}
+
 	// Get the secret & token for the service-account
 	client, secretRequest := getOseHTTPClient("GET", "api/v1/namespaces/"+project+"/secrets/"+secretName, nil)
 	secretResponse, err := client.Do(secretRequest)
