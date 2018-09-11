@@ -368,7 +368,7 @@ func createNfsVolume(project string, pvcName string, size string, username strin
 		UserInputValues: []common.WorkflowKeyValue{
 			{
 				Key:   "Projectname",
-				Value: fmt.Sprintf("vol_%v-%v", project, pvcName),
+				Value: fmt.Sprintf("nfs-%v-%v", project, pvcName),
 			},
 			{
 				Key:   "Projectsize",
@@ -500,7 +500,7 @@ func growNfsVolume(project string, newSize string, pvName string, username strin
 		UserInputValues: []common.WorkflowKeyValue{
 			{
 				Key:   "Projectname",
-				Value: strings.Replace(pvName, "nfs-", "vol_", 1),
+				Value: pvName,
 			},
 			{
 				Key:   "newSize",
