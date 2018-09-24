@@ -20,3 +20,5 @@
 node_modules/
 token.json
 env_vars
+gopkg*
+vendor/

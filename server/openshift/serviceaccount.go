@@ -15,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"os"
 	"strings"
+	"encoding/base64"
 )
 
 var jenkinsUrl string
@@ -146,13 +147,18 @@ func createJenkinsCredential(project string, serviceaccount string, organization
 		return errors.New(genericAPIError)
 	}
 
-	tokenData := strings.Trim(secretJson.Path("data.token").String(), "\"")
+	encodedTokenData, err := base64.StdEncoding.DecodeString(strings.Trim(secretJson.Path("data.token").String(), "\""))
+
+	if err != nil {
+		log.Println(err.Error())
+		return errors.New("Token von Openshift konnte nicht decoded werden aus Base64.")
+	}
 
 	// Call the WZU backend
 	command := newJenkinsCredentialsCommand{
 		OrganizationKey: organizationKey,
 		Description:     fmt.Sprintf("OpenShift Deployer - project: %v, service-account: %v", project, serviceaccount),
-		Secret:          tokenData,
+		Secret:          string(encodedTokenData),
 	}
 	byteJson, err := json.Marshal(command)
 	if err != nil {
