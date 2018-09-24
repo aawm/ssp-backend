@@ -9,13 +9,13 @@ import (
 
 	"fmt"
 
+	"encoding/base64"
 	"encoding/json"
 	"github.com/Jeffail/gabs"
 	"github.com/SchweizerischeBundesbahnen/ssp-backend/server/common"
 	"github.com/gin-gonic/gin"
 	"os"
 	"strings"
-	"encoding/base64"
 )
 
 var jenkinsUrl string
