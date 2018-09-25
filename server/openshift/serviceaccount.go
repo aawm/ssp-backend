@@ -147,7 +147,8 @@ func createJenkinsCredential(project string, serviceaccount string, organization
 		return errors.New(genericAPIError)
 	}
 
-	encodedTokenData, err := base64.StdEncoding.DecodeString(strings.Trim(secretJson.Path("data.token").String(), "\""))
+	tokenEncoded := strings.Trim(secretJson.Path("data.token").String(), "\"")
+	encodedTokenData, err := base64.StdEncoding.DecodeString(tokenEncoded)
 
 	if err != nil {
 		log.Println(err.Error())
