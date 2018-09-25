@@ -150,3 +150,13 @@ There is a small script for locally testing the API. It handles authorization (l
 ```
 go run curl.go [-X GET/POST] http://localhost:8080/api/...
 ```
+
+# run local
+```
+Start the application with following command "go build main.go"
+
+Add all the envoirement variables into the RunConfiguration of the go build. The keys can be found in env_vars.example
+The Values can be found in Openshift-Devmaster
+
+Then this backend is started at Port 8080 and ready for use.
+```
