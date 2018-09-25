@@ -9,6 +9,7 @@ import (
 
 	"fmt"
 
+	"encoding/base64"
 	"encoding/json"
 	"github.com/Jeffail/gabs"
 	"github.com/SchweizerischeBundesbahnen/ssp-backend/server/common"
@@ -146,13 +147,18 @@ func createJenkinsCredential(project string, serviceaccount string, organization
 		return errors.New(genericAPIError)
 	}
 
-	tokenData := strings.Trim(secretJson.Path("data.token").String(), "\"")
+	encodedTokenData, err := base64.StdEncoding.DecodeString(strings.Trim(secretJson.Path("data.token").String(), "\""))
+
+	if err != nil {
+		log.Println(err.Error())
+		return errors.New(genericAPIError)
+	}
 
 	// Call the WZU backend
 	command := newJenkinsCredentialsCommand{
 		OrganizationKey: organizationKey,
 		Description:     fmt.Sprintf("OpenShift Deployer - project: %v, service-account: %v", project, serviceaccount),
-		Secret:          tokenData,
+		Secret:          string(encodedTokenData),
 	}
 	byteJson, err := json.Marshal(command)
 	if err != nil {
