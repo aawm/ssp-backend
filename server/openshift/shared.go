@@ -98,8 +98,9 @@ func getProjectAdminsAndOperators(project string) ([]string, []string, error) {
 			operators = append(operators, strings.ToLower(u.Data().(string)))
 		}
 	}
-
-	return admins, operators, nil
+	// remove duplicates because admins are added two times:
+	// lowercase and uppercase
+	return common.RemoveDuplicates(admins), operators, nil
 }
 
 func checkAdminPermissions(username string, project string) error {

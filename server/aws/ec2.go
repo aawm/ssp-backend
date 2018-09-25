@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/SchweizerischeBundesbahnen/ssp-backend/server/common"
 	"github.com/aws/aws-sdk-go/aws"
@@ -263,7 +264,9 @@ func listEC2InstancesByUsernameForAccount(username string, account string) ([]co
 			{
 				Name: aws.String("tag:Owner"),
 				Values: []*string{
-					aws.String("*" + username + "*"),
+					// Case insensitive filter
+					aws.String("*" + strings.ToLower(username) + "*"),
+					aws.String("*" + strings.ToUpper(username) + "*"),
 				},
 			},
 		},

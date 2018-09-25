@@ -3,6 +3,7 @@ package common
 import (
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gopkg.in/appleboy/gin-jwt.v2"
@@ -35,10 +36,10 @@ func GetUserName(c *gin.Context) string {
 	// AuthUserKey is set by basic auth
 	user, exists := c.Get(gin.AuthUserKey)
 	if exists {
-		return user.(string)
+		return strings.ToLower(user.(string))
 	}
 	jwtClaims := jwt.ExtractClaims(c)
-	return jwtClaims["id"].(string)
+	return strings.ToLower(jwtClaims["id"].(string))
 }
 
 // GetUserMail returns the users mail address based of the gin.Context
@@ -52,4 +53,20 @@ func DebugMode() bool {
 	mode := gin.Mode()
 
 	return mode != gin.ReleaseMode
+}
+
+func RemoveDuplicates(elements []string) []string {
+	encountered := map[string]bool{}
+
+	// Create a map of all unique elements.
+	for v := range elements {
+		encountered[elements[v]] = true
+	}
+
+	// Place all keys from the map into a slice.
+	result := []string{}
+	for key := range encountered {
+		result = append(result, key)
+	}
+	return result
 }

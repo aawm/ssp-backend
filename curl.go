@@ -91,7 +91,7 @@ func login(u *url.URL) (*Token, error) {
 	username, password := promptUsernamePassword()
 	values := map[string]string{"Username": username, "Password": password}
 	jsonValue, _ := json.Marshal(values)
-	loginURL := fmt.Sprintf("%s://%s:%s/login", u.Scheme, u.Hostname(), u.Port())
+	loginURL := fmt.Sprintf("%s://%s/login", u.Scheme, u.Host)
 	resp, err := http.Post(loginURL, "application/json", bytes.NewBuffer(jsonValue))
 	if err != nil {
 		return nil, err
