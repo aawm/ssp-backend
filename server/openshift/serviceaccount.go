@@ -151,7 +151,7 @@ func createJenkinsCredential(project string, serviceaccount string, organization
 
 	if err != nil {
 		log.Println(err.Error())
-		return errors.New("Token von Openshift konnte nicht decoded werden aus Base64.")
+		return errors.New(genericAPIError)
 	}
 
 	// Call the WZU backend
