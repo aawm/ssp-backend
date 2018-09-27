@@ -46,12 +46,7 @@ func RegisterSecRoutes(r *gin.RouterGroup) {
 }
 
 func getProjectAdminsAndOperators(project string) ([]string, []string, error) {
-	policyBindings, err := getPolicyBindings(project)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	children, err := policyBindings.S("roleBindings").Children()
+	roleBindings, err := getRoleBindings(project)
 	if err != nil {
 		log.Println("Unable to parse roleBindings", err.Error())
 		return nil, nil, errors.New(genericAPIError)
@@ -59,9 +54,9 @@ func getProjectAdminsAndOperators(project string) ([]string, []string, error) {
 
 	var admins []string
 	hasOperatorGroup := false
-	for _, v := range children {
-		if v.Path("name").Data().(string) == "admin" {
-			groups, err := v.Path("roleBinding.groupNames").Children()
+	for _, v := range roleBindings {
+		if v.Path("metadata.name").Data().(string) == "admin" {
+			groups, err := v.Path("groupNames").Children()
 			if err == nil {
 				for _, g := range groups {
 					if strings.ToLower(g.Data().(string)) == "operator" {
@@ -69,7 +64,7 @@ func getProjectAdminsAndOperators(project string) ([]string, []string, error) {
 					}
 				}
 			}
-			usernames, err := v.Path("roleBinding.userNames").Children()
+			usernames, err := v.Path("userNames").Children()
 			if err != nil {
 				log.Println("Unable to parse roleBinding", err.Error())
 				return nil, nil, errors.New(genericAPIError)
@@ -182,6 +177,39 @@ func getPolicyBindings(project string) (*gabs.Container, error) {
 	}
 
 	return json, nil
+}
+
+func getRoleBindings(project string) ([]*gabs.Container, error) {
+	client, req := getOseHTTPClient("GET", "oapi/v1/namespaces/"+project+"/rolebindings", nil)
+	resp, err := client.Do(req)
+
+	if err != nil {
+		log.Println("Error from OpenShift API: ", err.Error())
+		return nil, errors.New(genericAPIError)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 404 {
+		log.Println("Project was not found", project)
+		return nil, errors.New("Das Projekt existiert nicht")
+	}
+	if resp.StatusCode == 403 {
+		log.Println("Cannot list RoleBindings: Forbidden")
+		return nil, errors.New(genericAPIError)
+	}
+	json, err := gabs.ParseJSONBuffer(resp.Body)
+	if err != nil {
+		log.Println("error parsing body of response:", err)
+		return nil, errors.New(genericAPIError)
+	}
+	items, err := json.Path("items").Children()
+	if err != nil {
+		log.Println("Unable to parse roleBindings", err.Error())
+		return nil, errors.New(genericAPIError)
+	}
+
+	return items, nil
 }
 
 func getOseAddress(end string) string {
