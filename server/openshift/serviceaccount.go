@@ -110,6 +110,9 @@ func createNewServiceAccount(username string, project string, serviceaccount str
 }
 
 func createJenkinsCredential(project string, serviceaccount string, organizationKey string) error {
+	//Sleep which ensures that the serviceaccount is created completely before we take the Secret out of it.
+	time.Sleep(400 * time.Millisecond)
+
 	// Get the created service-account
 	client, saRequest := getOseHTTPClient("GET", "api/v1/namespaces/"+project+"/serviceaccounts/"+serviceaccount, nil)
 	saResponse, err := client.Do(saRequest)
