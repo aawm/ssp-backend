@@ -133,7 +133,7 @@ func createJenkinsCredential(project string, serviceaccount string, organization
 		secretName = strings.Trim(secret.Path("name").String(), "\"")
 	}
 	//Sleep which ensures that the token is created completely before we take the Secret.
-	time.Sleep(400 * time.Millisecond)
+	time.Sleep(800 * time.Millisecond)
 
 	// Get the secret & token for the service-account
 	client, secretRequest := getOseHTTPClient("GET", "api/v1/namespaces/"+project+"/secrets/"+secretName, nil)
