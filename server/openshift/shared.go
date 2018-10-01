@@ -46,33 +46,29 @@ func RegisterSecRoutes(r *gin.RouterGroup) {
 }
 
 func getProjectAdminsAndOperators(project string) ([]string, []string, error) {
-	roleBindings, err := getRoleBindings(project)
+	adminRoleBinding, err := getAdminRoleBinding(project)
 	if err != nil {
-		log.Println("Unable to parse roleBindings", err.Error())
+		log.Println("Unable to get admin roleBinding", err.Error())
 		return nil, nil, errors.New(genericAPIError)
 	}
 
 	var admins []string
 	hasOperatorGroup := false
-	for _, v := range roleBindings {
-		if v.Path("metadata.name").Data().(string) == "admin" {
-			groups, err := v.Path("groupNames").Children()
-			if err == nil {
-				for _, g := range groups {
-					if strings.ToLower(g.Data().(string)) == "operator" {
-						hasOperatorGroup = true
-					}
-				}
-			}
-			usernames, err := v.Path("userNames").Children()
-			if err != nil {
-				log.Println("Unable to parse roleBinding", err.Error())
-				return nil, nil, errors.New(genericAPIError)
-			}
-			for _, u := range usernames {
-				admins = append(admins, strings.ToLower(u.Data().(string)))
+	groups, err := adminRoleBinding.Path("groupNames").Children()
+	if err == nil {
+		for _, g := range groups {
+			if strings.ToLower(g.Data().(string)) == "operator" {
+				hasOperatorGroup = true
 			}
 		}
+	}
+	usernames, err := adminRoleBinding.Path("userNames").Children()
+	if err != nil {
+		log.Println("Unable to parse roleBinding", err.Error())
+		return nil, nil, errors.New(genericAPIError)
+	}
+	for _, u := range usernames {
+		admins = append(admins, strings.ToLower(u.Data().(string)))
 	}
 
 	var operators []string
@@ -179,8 +175,8 @@ func getPolicyBindings(project string) (*gabs.Container, error) {
 	return json, nil
 }
 
-func getRoleBindings(project string) ([]*gabs.Container, error) {
-	client, req := getOseHTTPClient("GET", "oapi/v1/namespaces/"+project+"/rolebindings", nil)
+func getAdminRoleBinding(project string) (*gabs.Container, error) {
+	client, req := getOseHTTPClient("GET", "oapi/v1/namespaces/"+project+"/rolebindings/admin", nil)
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -203,13 +199,8 @@ func getRoleBindings(project string) ([]*gabs.Container, error) {
 		log.Println("error parsing body of response:", err)
 		return nil, errors.New(genericAPIError)
 	}
-	items, err := json.Path("items").Children()
-	if err != nil {
-		log.Println("Unable to parse roleBindings", err.Error())
-		return nil, errors.New(genericAPIError)
-	}
 
-	return items, nil
+	return json, nil
 }
 
 func getOseAddress(end string) string {
