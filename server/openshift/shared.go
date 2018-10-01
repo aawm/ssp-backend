@@ -150,31 +150,6 @@ func getOperatorGroup() (*gabs.Container, error) {
 	return json, nil
 }
 
-func getPolicyBindings(project string) (*gabs.Container, error) {
-	client, req := getOseHTTPClient("GET", "oapi/v1/namespaces/"+project+"/policybindings/:default", nil)
-	resp, err := client.Do(req)
-
-	if err != nil {
-		log.Println("Error from OpenShift API: ", err.Error())
-		return nil, errors.New(genericAPIError)
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode == 404 {
-		log.Println("Project was not found", project)
-		return nil, errors.New("Das Projekt existiert nicht")
-	}
-
-	json, err := gabs.ParseJSONBuffer(resp.Body)
-	if err != nil {
-		log.Println("error parsing body of response:", err)
-		return nil, errors.New(genericAPIError)
-	}
-
-	return json, nil
-}
-
 func getAdminRoleBinding(project string) (*gabs.Container, error) {
 	client, req := getOseHTTPClient("GET", "oapi/v1/namespaces/"+project+"/rolebindings/admin", nil)
 	resp, err := client.Do(req)
