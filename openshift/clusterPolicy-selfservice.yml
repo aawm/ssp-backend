@@ -7,7 +7,7 @@ rules:
 - apiGroups: null
   attributeRestrictions: null
   resources:
-  - policybindings
+  - rolebindings
   verbs:
   - get
   - list
