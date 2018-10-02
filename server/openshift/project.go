@@ -288,7 +288,7 @@ func createOrUpdateMetadata(project string, billing string, megaid string, usern
 
 	if resp.StatusCode == http.StatusOK {
 		resp.Body.Close()
-		log.Println("User "+username+" changed changed config of project project "+project+". Kontierungsnummer: "+billing, ", MegaID: "+megaid)
+		log.Println("User "+username+" changed config of project "+project+". Kontierungsnummer: "+billing, ", MegaID: "+megaid)
 		return nil
 	}
 
