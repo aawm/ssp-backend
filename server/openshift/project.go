@@ -196,29 +196,18 @@ func createNewProject(project string, username string, billing string, megaid st
 }
 
 func changeProjectPermission(project string, username string) error {
-	// Get existing policybindings
-	policyBindings, err := getPolicyBindings(project)
-
-	if policyBindings == nil {
+	adminRoleBinding, err := getAdminRoleBinding(project)
+	if err != nil {
 		return err
 	}
 
-	children, err := policyBindings.S("roleBindings").Children()
-	if err != nil {
-		log.Println("Unable to parse roleBindings", err.Error())
-		return errors.New(genericAPIError)
-	}
-	for _, v := range children {
-		if v.Path("name").Data().(string) == "admin" {
-			v.ArrayAppend(strings.ToLower(username), "roleBinding", "userNames")
-			v.ArrayAppend(strings.ToUpper(username), "roleBinding", "userNames")
-		}
-	}
+	adminRoleBinding.ArrayAppend(strings.ToLower(username), "userNames")
+	adminRoleBinding.ArrayAppend(strings.ToUpper(username), "userNames")
 
 	// Update the policyBindings on the api
 	client, req := getOseHTTPClient("PUT",
-		"oapi/v1/namespaces/"+project+"/policybindings/:default",
-		bytes.NewReader(policyBindings.Bytes()))
+		"oapi/v1/namespaces/"+project+"/rolebindings/admin",
+		bytes.NewReader(adminRoleBinding.Bytes()))
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -299,7 +288,7 @@ func createOrUpdateMetadata(project string, billing string, megaid string, usern
 
 	if resp.StatusCode == http.StatusOK {
 		resp.Body.Close()
-		log.Println("User "+username+" changed changed config of project project "+project+". Kontierungsnummer: "+billing, ", MegaID: "+megaid)
+		log.Println("User "+username+" changed config of project "+project+". Kontierungsnummer: "+billing, ", MegaID: "+megaid)
 		return nil
 	}
 
